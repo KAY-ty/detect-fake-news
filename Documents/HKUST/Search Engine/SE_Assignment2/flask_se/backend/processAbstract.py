@@ -4,68 +4,16 @@ from nltk.tokenize import sent_tokenize, word_tokenize, RegexpTokenizer
 from nltk.corpus import stopwords
 import math
 import json
+import numpy as np
 
 ps = PorterStemmer()
 stop_words = set(stopwords.words('english'))
-#proccessAbstrctDict = {}
-
-def test():
-    with open("paper.json", "r") as f:
-        paperlist = json.loads(f.read())
-    abstract = paperlist[1]["abstract"]
-    tokenizer = RegexpTokenizer(r'\w+')
-    word_tokens = tokenizer.tokenize(abstract)
-    print(word_tokens[47])
-    
-
 
 #show the position of the word in the paper's index(with out stoping word and marks)
 #struct:
 #{"wordname":{
 #               "paperindex": [a list of position]
 #             }
-def process_abstract():
-    proccessAbstrctDict = {}
-    with open("paper.json", "r") as f:
-        paperlist = json.loads(f.read())
-
-    index = -1
-    for dic in paperlist:
-        #the index of paper, value from 0 to 777
-        index = index + 1
-
-        #get the abstract
-        abstract = dic['abstract']
-
-        # Discard punctuation marks & perform tokenization
-        tokenizer = RegexpTokenizer(r'\w+')
-        word_tokens = tokenizer.tokenize(abstract)
-
-        # Stop word remove & stemming
-        stem_abstract = []
-        for word in word_tokens:
-            if word not in stop_words:
-                stem_abstract.append(ps.stem(word))
-
-        # n is the nth word in the stem_abstract of the No.index paper
-        n = 0
-        for word in stem_abstract:
-            if word in proccessAbstrctDict:  # No.n word exist in the dict
-                if index in proccessAbstrctDict[word]:# index of current paper exist in the dict[word]
-                    list = proccessAbstrctDict[word][index]
-                    list.append(n)
-                    n = n + 1
-                else:# index of current paper do not exist in the dict[word]
-                    proccessAbstrctDict.setdefault(word, {})[index] = [n]
-                    n = n + 1
-
-            else:# No.n word do not exist in the dict
-                proccessAbstrctDict.setdefault(word, {})[index] = [n]
-                n = n + 1
-
-    with open("processed_abstract.json", "w") as f:
-        json.dump(proccessAbstrctDict, f)
-
 def process_abstract_original_position():
     proccessAbstrctDict = {}
     with open("paper.json", "r") as f:
@@ -83,15 +31,14 @@ def process_abstract_original_position():
         tokenizer = RegexpTokenizer(r'\w+')
         word_tokens = tokenizer.tokenize(abstract)
 
-        # Stemming
-        stem_abstract = []
-        for word in word_tokens:
-            stem_abstract.append(ps.stem(word))
-
         # n is the nth word in the stem_abstract of the No.index paper
         n = 0
-        for word in stem_abstract:
-            if word not in stop_words:
+        for word in word_tokens:
+            word = word.lower()
+            if word in stop_words:
+                n = n+1
+            elif word not in stop_words:
+                word = ps.stem(word)
                 if word in proccessAbstrctDict:  # No.n word exist in the dict
                     if index in proccessAbstrctDict[word]:# index of current paper exist in the dict[word]
                         list = proccessAbstrctDict[word][index]
@@ -104,8 +51,7 @@ def process_abstract_original_position():
                 else:# No.n word do not exist in the dict
                     proccessAbstrctDict.setdefault(word, {})[index] = [n]
                     n = n + 1
-            else:
-                n = n+1
+
 
     with open("processed_abstract_original_position.json", "w") as f:
         json.dump(proccessAbstrctDict, f)
@@ -118,7 +64,7 @@ def process_abstract_original_position():
 #             }
 def build_word_document_frequecy():
     word_document_frequency_dict = {}
-    with open("processed_abstract.json", "r") as f:
+    with open("processed_abstract_original_position.json", "r") as f:
         wordlist = json.loads(f.read())
 
     for word in wordlist:
@@ -198,7 +144,7 @@ def build_unique_word():
         if df_dict[word] == 1:
             temp = word_document_frequecy_dict[word]
             for index in temp:
-                print(word, index)
+                #print(word, index)
                 if index not in unique_dict:
                     list = [word]
                     unique_dict[index] = list
@@ -211,14 +157,10 @@ def build_unique_word():
 
 
 
-
-
 if __name__ == '__main__':
-    # process_abstract()
-    # build_word_document_frequecy()
-    # build_document_word_frequency()
-    #process_abstract_original_position()
-    #test()
-    #build_df_idf()
-    #build_l2norm()
+    process_abstract_original_position()
+    build_word_document_frequecy()
+    build_document_word_frequency()
+    build_df_idf()
+    build_l2norm()
     build_unique_word()

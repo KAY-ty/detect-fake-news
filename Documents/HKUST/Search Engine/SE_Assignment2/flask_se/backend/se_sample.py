@@ -1,7 +1,7 @@
 '''
-Author: JasonYU
-Date: 2020-10-02 09:17:33
-LastEditTime: 2020-10-04 10:00:43
+Author: TANG Yinkai
+Date: 2020-10-02
+LastEditTime: 2020-10-29
 FilePath: \SE\flask_se\backend\se_sample.py
 '''
 
@@ -160,12 +160,6 @@ def CosSim1(vector, matrix):
 
 
 
-
-def raiseNotImplementedError(param):
-    pass
-
-
-
 def search_api(query):
     """
     query:[string] 
@@ -199,14 +193,22 @@ def search_api(query):
         word_frequency = sorted(temp.items(), key=lambda x: x[1], reverse=True)
         for j in range(0, 5):
             word, frequency = word_frequency[j]
-            # print(word, frequency)
-            list = processed_abstract_dict[word][str(index)]
+            #print(word, frequency)
+            if word in processed_abstract_dict:
+                #list = processed_abstract_dict[word][str(index)]
+                list = processed_abstract_dict[word]
+            else:
+                list = "this word is a stop word, we do not record this word's position"
             print(word, "\t ->\t", list)
 
+        print("The number of unique keywords in the document: \t", len(document_word_frequency_dict[str(index)]))
+
         if str(index) in unique_word_dict:
-            print("The number of unique keywords in the document: \t", unique_word_dict[str(index)])
+            print("The number of keywords that only exist in the document: \t", len(unique_word_dict[str(index)]))
+            print("Keywords that only exist in the document: \t", unique_word_dict[str(index)])
         else:
-            print("The number of unique keywords in the document: \t", "[]")
+            print("The number of keywords that only exist in the document: \t", 0)
+            print("Keywords that only exist in the document: \t", "[]")
         print("The magnitude (L2 norm) of the document vector: \t", document_length[str(index)])
         print("The similarity score: \t", score)
 
@@ -215,50 +217,14 @@ def search_api(query):
 
 
 if __name__ == "__main__":
-    #search_api("knowledge graph")
-    '''
-    query = "knowledge graph"
-    dict = process_query(query)
-    print(dict)
-
-    vector = get_vector(dict)
-    matrix = get_matix(dict)
-    print(vector)
-    # print(vector)
-    # for temp in matrix:
-    #     print(temp)
-
-    similar = CosSim1(vector, matrix)
-    #print(similar)
-
-    pagerank_dict = sorted(similar.items(), key=lambda x: x[1], reverse = True)
-    #print(pagerank_dict)
-
-    for i in range(0, 5):
-        print("-----------------------------------")
-        index, score = pagerank_dict[i]
-        print("Document ID: \t", index)
-        print("Five highest weighted keywords of the document and the corresponding postings lists:")
-        temp = document_word_frequency_dict[str(index)]
-        word_frequency = sorted(temp.items(), key=lambda x:x[1], reverse = True)
-        for j in range(0, 5):
-            word, frequency = word_frequency[j]
-            #print(word, frequency)
-            list = processed_abstract_dict[word][str(index)]
-            print(word,"\t ->\t",list)
-
-        if str(index) in unique_word_dict:
-            print("The number of unique keywords in the document: \t", unique_word_dict[str(index)])
-        else:
-            print("The number of unique keywords in the document: \t", "[]")
-        print("The magnitude (L2 norm) of the document vector: \t", document_length[str(index)])
-        print("The similarity score: \t", score)
-        '''
+    search_api("knowledge graph")
+    #print({}==process_query("     "))
 
 
 
 
     '''
+    further work:
     还需要写一个函数，query有没有一起出现在paper的abstract中
     现在得到的similar是分别对knowledg和graph计算得到对值，
     现在确定是否有文件中存在knowledg graph同时出现，
